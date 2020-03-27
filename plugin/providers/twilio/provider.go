@@ -20,17 +20,17 @@ func Provider() terraform.ResourceProvider {
 // List of supported configuration fields for your provider.
 func providerSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"account_sid": &schema.Schema{
+		"account_sid": {
 			Type:        schema.TypeString,
 			Required:    true,
 			Description: "The unique ID that identifies your Twilio account. Starts with `AC` and can be found on the Settings -> General page (https://www.twilio.com/console/project/settings).",
 		},
-		"auth_token": &schema.Schema{
+		"auth_token": {
 			Type:        schema.TypeString,
 			Required:    true,
 			Description: "Your secret token to access your Twilio account. Keep this safe - DO NOT check this into source control!",
 		},
-		"endpoint": &schema.Schema{
+		"endpoint": {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Default:     "",
@@ -50,7 +50,10 @@ func providerResources() map[string]*schema.Resource {
 
 // List of supported data sources and their configuration fields.
 func providerDataSourcesMap() map[string]*schema.Resource {
-	return map[string]*schema.Resource{}
+	return map[string]*schema.Resource{
+		"twilio_phone_number": dataTwilioPhoneNumber(),
+		"twilio_subaccount":   dataTwilioSubaccount(),
+	}
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
@@ -60,4 +63,21 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		Endpoint:   d.Get("endpoint").(string),
 	}
 	return config.Client()
+}
+
+func makeComputed(s map[string]*schema.Schema) map[string]*schema.Schema {
+	for _, p := range s {
+		p.Optional = false
+		p.Required = false
+		p.Computed = true
+		p.MaxItems = 0
+		p.MinItems = 0
+		p.ValidateFunc = nil
+		p.DefaultFunc = nil
+		p.Default = nil
+		if resource, ok := p.Elem.(*schema.Resource); ok {
+			makeComputed(resource.Schema)
+		}
+	}
+	return s
 }

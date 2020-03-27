@@ -22,27 +22,27 @@ func resourceTwilioApiKey() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"sid": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"friendly_name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"secret": &schema.Schema{
-				Type:      schema.TypeString,
-				Computed:  true,
-				Sensitive: true,
-			},
-			"date_created": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"date_updated": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
+			"sid": {
+                Type:     schema.TypeString,
+                Computed: true,
+            },
+			"friendly_name": {
+                Type:     schema.TypeString,
+                Optional: true,
+            },
+			"secret": {
+                Type:      schema.TypeString,
+                Computed:  true,
+                Sensitive: true,
+            },
+			"date_created": {
+                Type:     schema.TypeString,
+                Computed: true,
+            },
+			"date_updated": {
+                Type:     schema.TypeString,
+                Computed: true,
+            },
 		},
 	}
 }

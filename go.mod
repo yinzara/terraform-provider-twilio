@@ -1,5 +1,7 @@
 module github.com/Preskton/terraform-provider-twilio
 
+go 1.12
+
 require (
 	github.com/apache/thrift v0.12.0 // indirect
 	github.com/fatih/structs v1.1.0

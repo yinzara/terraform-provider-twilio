@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/kevinburke/twilio-go"
 	"net/url"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -22,31 +23,31 @@ func resourceTwilioSubaccount() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"parent_account_sid": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"friendly_name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"status": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "active",
-			},
-			"auth_token": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"date_created": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"date_updated": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
+			"parent_account_sid": {
+                Type:     schema.TypeString,
+                Computed: true,
+            },
+			"friendly_name": {
+                Type:     schema.TypeString,
+                Optional: true,
+            },
+			"status": {
+                Type:     schema.TypeString,
+                Optional: true,
+                Default:  "active",
+            },
+			"auth_token": {
+                Type:     schema.TypeString,
+                Computed: true,
+            },
+			"date_created": {
+                Type:     schema.TypeString,
+                Computed: true,
+            },
+			"date_updated": {
+                Type:     schema.TypeString,
+                Computed: true,
+            },
 		},
 	}
 }
@@ -72,7 +73,6 @@ func resourceTwilioSubaccountCreate(d *schema.ResourceData, meta interface{}) er
 
 	client := meta.(*TerraformTwilioContext).client
 	config := meta.(*TerraformTwilioContext).configuration
-	context := context.TODO()
 
 	createParams := flattenSubaccountForCreate(d)
 
@@ -82,7 +82,7 @@ func resourceTwilioSubaccountCreate(d *schema.ResourceData, meta interface{}) er
 		},
 	).Debug("START client.AccountsCreate")
 
-	createResult, err := client.Accounts.Create(context, createParams)
+	createResult, err := client.Accounts.Create(context.TODO(), createParams)
 
 	if err != nil {
 		log.WithFields(
@@ -95,12 +95,14 @@ func resourceTwilioSubaccountCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	d.SetId(createResult.Sid)
-	d.Set("status", createResult.Status)
-	d.Set("auth_token", createResult.AuthToken)
-	d.Set("friendly_name", createResult.FriendlyName) // In the event that the name wasn't specified, Twilio generates one for you
-	d.Set("date_created", createResult.DateCreated)
-	d.Set("date_updated", createResult.DateUpdated)
-	d.Set("parent_account_sid", createResult.OwnerAccountSid)
+	if err = mapTwilioSubaccountToTerraform(createResult, d); err != nil {
+        log.WithFields(
+            log.Fields{
+                "parent_account_sid": config.AccountSID,
+            },
+        ).WithError(err).Error("ERROR mapTwilioSubaccountToTerraform")
+	    return err
+    }
 
 	log.WithFields(
 		log.Fields{
@@ -117,7 +119,6 @@ func resourceTwilioSubaccountRead(d *schema.ResourceData, meta interface{}) erro
 
 	client := meta.(*TerraformTwilioContext).client
 	config := meta.(*TerraformTwilioContext).configuration
-	context := context.TODO()
 
 	sid := d.Id()
 
@@ -128,27 +129,43 @@ func resourceTwilioSubaccountRead(d *schema.ResourceData, meta interface{}) erro
 		},
 	).Debug("START client.Accounts.Get")
 
-	account, err := client.Accounts.Get(context, sid)
-
-	d.Set("status", account.Status)
-	d.Set("auth_token", account.AuthToken)
-	d.Set("friendly_name", account.FriendlyName) // In the event that the name wasn't specified, Twilio generates one for you
-	d.Set("date_created", account.DateCreated)
-	d.Set("date_updated", account.DateUpdated)
-	d.Set("parent_account_sid", account.OwnerAccountSid)
-
-	log.WithFields(
-		log.Fields{
-			"parent_account_sid": config.AccountSID,
-			"subaccount_sid":     sid,
-		},
-	).Debug("END client.AccountsGet")
+	account, err := client.Accounts.Get(context.TODO(), sid)
+	if err == nil {
+		err = mapTwilioSubaccountToTerraform(account, d)
+	}
 
 	if err != nil {
 		return fmt.Errorf("Failed to refresh account: %s", err.Error())
 	}
 
+	log.WithFields(
+		log.Fields{
+			"parent_account_sid": config.AccountSID,
+			"subaccount_sid":     d.Id(),
+		},
+	).Debug("END client.AccountsGet")
+
 	return nil
+}
+
+func mapTwilioSubaccountToTerraform(account *twilio.Account, d *schema.ResourceData) error {
+	err := d.Set("status", account.Status)
+	if err == nil {
+		err = d.Set("auth_token", account.AuthToken)
+	}
+	if err == nil {
+		err = d.Set("friendly_name", account.FriendlyName)
+	}
+	if err == nil && account.DateCreated.Valid {
+		err = d.Set("date_created", account.DateCreated.Time.Format("2006-01-02T15:04:05-07:00"))
+	}
+	if err == nil && account.DateUpdated.Valid {
+		err = d.Set("date_updated", account.DateUpdated.Time.Format("2006-01-02T15:04:05-07:00"))
+	}
+	if err == nil {
+		err = d.Set("parent_account_sid", account.OwnerAccountSid)
+	}
+	return err
 }
 
 func resourceTwilioSubaccountUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -160,7 +177,6 @@ func resourceTwilioSubaccountDelete(d *schema.ResourceData, meta interface{}) er
 
 	client := meta.(*TerraformTwilioContext).client
 	config := meta.(*TerraformTwilioContext).configuration
-	context := context.TODO()
 
 	sid := d.Id()
 
@@ -173,7 +189,7 @@ func resourceTwilioSubaccountDelete(d *schema.ResourceData, meta interface{}) er
 		},
 	).Debug("START client.Accounts.Delete")
 
-	_, err := client.Accounts.Update(context, sid, updateData)
+	_, err := client.Accounts.Update(context.TODO(), sid, updateData)
 
 	log.WithFields(
 		log.Fields{
