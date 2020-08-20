@@ -43,6 +43,7 @@ func providerSchema() map[string]*schema.Schema {
 func providerResources() map[string]*schema.Resource {
 	return map[string]*schema.Resource{
 		"twilio_phone_number": resourceTwilioPhoneNumber(),
+		"twilio_messaging_service": resourceTwilioMessagingService(),
 		"twilio_subaccount":   resourceTwilioSubaccount(),
 		"twilio_api_key":      resourceTwilioApiKey(),
 	}
@@ -51,6 +52,7 @@ func providerResources() map[string]*schema.Resource {
 // List of supported data sources and their configuration fields.
 func providerDataSourcesMap() map[string]*schema.Resource {
 	return map[string]*schema.Resource{
+	    "twilio_messaging_service": dataTwilioMessagingService(),
 		"twilio_phone_number": dataTwilioPhoneNumber(),
 		"twilio_subaccount":   dataTwilioSubaccount(),
 	}
