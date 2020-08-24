@@ -16,4 +16,4 @@ require (
 	gopkg.in/yaml.v2 v2.2.4 // indirect
 )
 
-replace github.com/kevinburke/twilio-go => github.com/yinzara/twilio-go v0.0.0-20200819210423-0111d7a4b98c
+replace github.com/kevinburke/twilio-go => github.com/yinzara/twilio-go v0.0.0-20200823055109-ceeb735352f5

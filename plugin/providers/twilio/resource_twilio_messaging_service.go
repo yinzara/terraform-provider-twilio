@@ -141,8 +141,8 @@ func mapTwilioMessagingServiceToTerraform(ms *twilio.Service, d *schema.Resource
 	if ms.DateUpdated.Valid {
 		err = d.Set("date_updated", ms.DateUpdated.Time.Format("2006-01-02T15:04:05-07:00"))
 	}
-	if err == nil && ms.InboundRequestURL.Valid {
-		err = d.Set("inbound_request_url", ms.InboundRequestURL)
+	if err == nil && ms.InboundRequestURL != nil {
+		err = d.Set("inbound_request_url", *ms.InboundRequestURL)
 	}
 	if err == nil {
 		err = d.Set("inbound_method", ms.InboundMethod)

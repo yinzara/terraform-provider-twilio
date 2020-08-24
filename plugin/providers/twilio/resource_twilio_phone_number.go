@@ -42,6 +42,16 @@ func resourceTwilioPhoneNumber() *schema.Resource {
 				Optional:    true,
 				Description: "Look for a number within this area code.",
 			},
+			"type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "Local",
+				ValidateFunc: validation.StringInSlice([]string{
+					"Local",
+					"Mobile",
+					"TollFree",
+				}, false),
+			},
 			"country_code": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -102,20 +112,17 @@ func resourceTwilioPhoneNumber() *schema.Resource {
 				MinItems: 0,
 				MaxItems: 1,
 				Optional: true,
-				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"application_sid": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Computed:    true,
 							Description: "SID of the Twilio application to invoke when an SMS is sent to this number.",
 						},
 						"primary_http_method": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Default:  "POST",
-							Computed: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"POST",
 								"GET",
@@ -124,21 +131,18 @@ func resourceTwilioPhoneNumber() *schema.Resource {
 						},
 						"primary_url": {
 							Type:        schema.TypeString,
-							Computed:    true,
 							Optional:    true,
 							Description: "The URL called when an SMS is sent to this number.",
 						},
 						"fallback_http_method": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Computed:    true,
 							Default:     "POST",
 							Description: "The HTTP method for the fallback URL. Can be `GET` or `POST`, defaults to `POST`.",
 						},
 						"fallback_url": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Computed:    true,
 							Description: "The URL called if the primary URL returns a non-favorable status code.",
 						},
 					},
@@ -148,20 +152,17 @@ func resourceTwilioPhoneNumber() *schema.Resource {
 				Type:     schema.TypeSet,
 				MinItems: 0,
 				MaxItems: 1,
-				Computed: true,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"url": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Computed:    true,
 							Description: "The URL called when a whenever a status change occurs on this number.",
 						},
 						"http_method": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Computed: true,
 							Default:  "POST",
 							ValidateFunc: validation.StringInSlice([]string{
 								"POST",
@@ -177,19 +178,16 @@ func resourceTwilioPhoneNumber() *schema.Resource {
 				MinItems: 0,
 				MaxItems: 1,
 				Optional: true,
-				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"application_sid": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Computed:    true,
 							Description: "SID of the Twilio application to invoke when a call is started with this number.",
 						},
 						"primary_http_method": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Computed: true,
 							Default:  "POST",
 							ValidateFunc: validation.StringInSlice([]string{
 								"POST",
@@ -200,13 +198,11 @@ func resourceTwilioPhoneNumber() *schema.Resource {
 						"primary_url": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Computed:    true,
 							Description: "The URL called when a phone call starts on this number.",
 						},
 						"fallback_http_method": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Computed: true,
 							Default:  "POST",
 							ValidateFunc: validation.StringInSlice([]string{
 								"POST",
@@ -217,19 +213,16 @@ func resourceTwilioPhoneNumber() *schema.Resource {
 						"fallback_url": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Computed:    true,
 							Description: "The URL called if the primary URL returns a non-favorable status code.",
 						},
 						"caller_id_enabled": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Computed:    true,
 							Description: "If caller ID is enabled or not for this number. If enabled, incurs additional charge per call (see console for pricing). Can be `true` or `false`, defaults to `false`.",
 						},
 						"receive_mode": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Computed:    true,
 							Description: "Determines if the line is set up for voice or fax. Can be `voice` or `fax`, defaults to `voice`.",
 						},
 					},
@@ -238,19 +231,16 @@ func resourceTwilioPhoneNumber() *schema.Resource {
 			"address_sid": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Computed:    true,
 				Description: "SID of the address associated with this phone number. May be required for certain countries.",
 			},
 			"trunk_sid": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Computed:    true,
 				Description: "SID of the voice trunk that will handle calls to this number. If set, overrides any voice URLs or applications: only the trunk will recieve the incoming call.",
 			},
 			"identity_sid": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Computed:    true,
 				Description: "SID of the identity associated with the phone number. May be required in certain countries.",
 			},
 			"emergency": {
@@ -258,13 +248,11 @@ func resourceTwilioPhoneNumber() *schema.Resource {
 				MinItems: 0,
 				MaxItems: 1,
 				Optional: true,
-				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"status": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							Computed:     true,
 							Default:      "Active",
 							ValidateFunc: validation.StringInSlice([]string{"Active", "Inactive"}, true),
 							Description:  "Status of this phone number. Either `Active` or `Inactive`.",
@@ -272,7 +260,6 @@ func resourceTwilioPhoneNumber() *schema.Resource {
 						"address_sid": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Computed:    true,
 							Description: "SID of the address used for emergency calling from this number. The address must be validated before it can be used for emergency purposes.",
 						},
 					},
@@ -440,6 +427,7 @@ func resourceTwilioPhoneNumberCreate(d *schema.ResourceData, meta interface{}) e
 
 	// Required parameter
 	countryCode := d.Get("country_code").(string)
+	numType := d.Get("type").(string)
 
 	//var searchParams url.Values
 	searchParams := make(url.Values)
@@ -454,17 +442,22 @@ func resourceTwilioPhoneNumberCreate(d *schema.ResourceData, meta interface{}) e
 	if len(search) > 0 {
 		searchParams.Set("Contains", search)
 	}
-
 	log.WithFields(
 		log.Fields{
 			"account_sid":  config.AccountSID,
 			"country_code": countryCode,
 		},
-	).Debug("START client.Available.Numbers.Local.GetPage")
+	).Debug(fmt.Sprintf("START client.Available.Numbers.%s.GetPage", numType))
 
-	// TODO switch based on the type of number to buy local, mobile, intl
-	searchResult, err := client.AvailableNumbers.Local.GetPage(ctx, countryCode, searchParams)
-
+	var searchResult *twilio.AvailableNumberPage
+	var err error
+	if numType == "Mobile" {
+		searchResult, err = client.AvailableNumbers.Mobile.GetPage(ctx, countryCode, searchParams)
+	} else if numType == "TollFree" {
+		searchResult, err = client.AvailableNumbers.TollFree.GetPage(ctx, countryCode, searchParams)
+	} else {
+		searchResult, err = client.AvailableNumbers.Local.GetPage(ctx, countryCode, searchParams)
+	}
 	if err != nil {
 		log.WithFields(
 			log.Fields{
@@ -483,7 +476,7 @@ func resourceTwilioPhoneNumberCreate(d *schema.ResourceData, meta interface{}) e
 			"search":       search,
 			"result_count": len(searchResult.Numbers),
 		},
-	).Debug("END client.Available.Nubmers.Local.GetPage")
+	).Debug(fmt.Sprintf("END client.Available.Numbers.%s.GetPage", numType))
 
 	if searchResult != nil && len(searchResult.Numbers) == 0 {
 		log.WithFields(
